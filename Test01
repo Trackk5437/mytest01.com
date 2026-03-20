@@ -1,2 +1,12 @@
-Hello
-This is a Test!
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Meine erste Website</title>
+</head>
+<body>
+
+    <h1>Willkommen auf meiner Website 😎</h1>
+    <p>Das ist meine erste Seite mit GitHub Pages!</p>
+
+</body>
+</html>

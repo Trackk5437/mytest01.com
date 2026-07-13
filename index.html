@@ -1,12 +1,398 @@
 <!DOCTYPE html>
-<html>
+<html lang="de">
 <head>
-    <title>Meine erste Website</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>E-Tuning Pro - Professionelles E-Roller Tuning</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', system-ui, sans-serif; }
+        .hero-bg {
+            background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.85)), url('https://picsum.photos/id/1015/1920/1080') center/cover no-repeat;
+        }
+        .toggle-switch {
+            position: relative; display: inline-block; width: 60px; height: 34px;
+        }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #4b5563; transition: .4s; border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 26px; width: 26px;
+            left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%;
+        }
+        input:checked + .slider { background-color: #22c55e; }
+        input:checked + .slider:before { transform: translateX(26px); }
+        .modal { animation: modalPop 0.3s ease; }
+        @keyframes modalPop { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    </style>
 </head>
-<body>
+<body class="bg-zinc-950 text-white">
+    <!-- Navbar -->
+    <nav class="bg-black border-b border-zinc-800 fixed w-full z-50">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-bolt text-3xl text-lime-500"></i>
+                <span class="font-bold text-2xl tracking-tight">E-TUNING PRO</span>
+            </div>
+            <div class="hidden md:flex items-center gap-8 text-sm font-medium">
+                <a href="#" onclick="navigateTo('home')" class="hover:text-lime-400">Home</a>
+                <a href="#" onclick="navigateTo('shop')" class="hover:text-lime-400">Shop</a>
+                <a href="#" onclick="navigateTo('tuning')" class="hover:text-lime-400">Tuning</a>
+            </div>
+            <button onclick="toggleMenu()" class="md:hidden text-3xl">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+    </nav>
 
-    <h1>Willkommen auf meiner Website 😎</h1>
-    <p>Das ist meine erste Seite mit GitHub Pages!</p>
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="hidden fixed inset-0 bg-zinc-950 z-[60] pt-20">
+        <div class="flex flex-col p-6 text-lg">
+            <a href="#" onclick="navigateTo('home');toggleMenu()" class="py-4 border-b border-zinc-800">Home</a>
+            <a href="#" onclick="navigateTo('shop');toggleMenu()" class="py-4 border-b border-zinc-800">Shop</a>
+            <a href="#" onclick="navigateTo('tuning');toggleMenu()" class="py-4 border-b border-zinc-800">Tuning</a>
+            <a href="#" onclick="showFAQ();toggleMenu()" class="py-4 border-b border-zinc-800">FAQ</a>
+            <a href="#" onclick="showLegal();toggleMenu()" class="py-4 border-b border-zinc-800">Impressum</a>
+            <a href="#" onclick="showPrivacy();toggleMenu()" class="py-4">Datenschutz</a>
+        </div>
+    </div>
 
+    <!-- HOME -->
+    <section id="home-section" class="hero-bg min-h-screen flex items-center pt-20">
+        <div class="max-w-4xl mx-auto px-6 text-center">
+            <h1 class="text-6xl md:text-7xl font-bold leading-tight mb-8">Willkommen bei E-TUNING PRO</h1>
+            <p class="text-2xl text-zinc-300 mb-12">Professionelles Tuning für Ninebot, Xiaomi &amp; Segway E-Roller.</p>
+            <button onclick="navigateTo('tuning')" 
+                    class="bg-lime-500 text-black font-bold text-2xl px-12 py-6 rounded-3xl hover:bg-lime-400">Tuning starten</button>
+        </div>
+    </section>
+
+    <!-- TUNING -->
+    <section id="tuning-section" class="hidden min-h-screen py-20 bg-zinc-900">
+        <div class="max-w-5xl mx-auto px-6">
+            <h2 class="text-4xl font-bold mb-10 text-center">Tuning App</h2>
+            
+            <button onclick="showLicenseModal()" 
+                    class="mx-auto block mb-12 px-10 py-4 bg-zinc-800 hover:bg-zinc-700 rounded-2xl text-xl flex items-center gap-4">
+                <i class="fa-solid fa-key"></i> Lizenzcode eingeben
+            </button>
+            
+            <div id="tuning-content" class="hidden">
+                <div class="mb-10">
+                    <label class="block text-sm mb-3 text-zinc-400">Modell auswählen</label>
+                    <select id="scooter-model" onchange="updateModelSpecifics()" 
+                            class="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-6 py-5 text-xl">
+                    </select>
+                </div>
+                
+                <button onclick="connectDevice()" 
+                        class="w-full bg-lime-500 hover:bg-lime-600 text-black font-bold py-7 text-2xl rounded-3xl flex items-center justify-center gap-4">
+                    <i class="fa-solid fa-bluetooth-b"></i> GERÄT VERBINDEN
+                </button>
+                
+                <div id="connection-status" class="hidden mt-12 bg-zinc-800 rounded-3xl p-10">
+                    <div class="flex justify-between mb-10">
+                        <div class="flex items-center gap-5">
+                            <div class="w-6 h-6 bg-green-500 rounded-full animate-pulse"></div>
+                            <span id="status-text" class="text-2xl font-semibold"></span>
+                        </div>
+                        <button onclick="disconnectDevice()" class="text-4xl text-red-400 hover:text-red-500">✕</button>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-2 gap-12">
+                        <div>
+                            <h3 class="font-semibold mb-8 text-xl">Steuerung</h3>
+                            <div class="space-y-9">
+                                <div class="flex justify-between items-center">
+                                    <span>Tempomat</span>
+                                    <label class="toggle-switch"><input type="checkbox"><span class="slider"></span></label>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span>Zero Start</span>
+                                    <label class="toggle-switch"><input type="checkbox"><span class="slider"></span></label>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span>Police Mode</span>
+                                    <label class="toggle-switch"><input type="checkbox"><span class="slider"></span></label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h3 class="font-semibold mb-8 text-xl">Geschwindigkeitslimit</h3>
+                            <input type="range" id="speed-slider" min="1" max="60" value="25" oninput="updateSpeedValue(this)" class="w-full accent-lime-500">
+                            <div class="flex justify-between text-sm mt-4">
+                                <span>1 km/h</span>
+                                <span id="speed-value" class="font-mono text-6xl font-bold text-lime-400">25</span>
+                                <span>60 km/h</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="model-specific" class="hidden mt-12 pt-10 border-t border-zinc-700">
+                        <h3 class="font-semibold mb-6">Zusatzbeleuchtung (G3 Max)</h3>
+                        <div class="flex gap-10">
+                            <label class="flex items-center gap-3"><input type="checkbox" class="accent-lime-500 w-5 h-5"> Vordere Lichtleiste</label>
+                            <label class="flex items-center gap-3"><input type="checkbox" class="accent-lime-500 w-5 h-5"> Unterbodenbeleuchtung</label>
+                        </div>
+                    </div>
+                    
+                    <button onclick="startFlash()" class="mt-16 w-full py-9 text-3xl font-bold bg-gradient-to-r from-orange-500 to-red-600 rounded-3xl">
+                        ⚡ FLASH STARTEN
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SHOP -->
+    <section id="shop-section" class="hidden py-20 bg-zinc-900">
+        <div class="max-w-5xl mx-auto px-6">
+            <h2 class="text-4xl font-bold text-center mb-4">Zuverlässiges Tuning</h2>
+            <p class="text-center text-xl text-zinc-400 mb-16">Viele Modelle • Tempomat • Police Mode • Zero Start und mehr</p>
+            
+            <div class="grid md:grid-cols-4 gap-6">
+                <div class="bg-zinc-800 rounded-3xl p-8 text-center">
+                    <div class="text-2xl font-medium text-lime-400">1 Tag</div>
+                    <div class="text-6xl font-bold my-8">5 €</div>
+                    <button onclick="buySubscription()" class="w-full py-4 bg-zinc-700 hover:bg-lime-500 hover:text-black rounded-2xl">Weiter</button>
+                </div>
+                <div class="bg-zinc-800 rounded-3xl p-8 text-center">
+                    <div class="text-2xl font-medium text-lime-400">1 Woche</div>
+                    <div class="text-6xl font-bold my-8">10 €</div>
+                    <button onclick="buySubscription()" class="w-full py-4 bg-zinc-700 hover:bg-lime-500 hover:text-black rounded-2xl">Weiter</button>
+                </div>
+                <div class="bg-zinc-800 rounded-3xl p-8 text-center">
+                    <div class="text-2xl font-medium text-lime-400">1 Monat</div>
+                    <div class="text-6xl font-bold my-8">15 €</div>
+                    <button onclick="buySubscription()" class="w-full py-4 bg-zinc-700 hover:bg-lime-500 hover:text-black rounded-2xl">Weiter</button>
+                </div>
+                <div class="bg-zinc-800 rounded-3xl p-8 text-center border-2 border-lime-500">
+                    <div class="text-2xl font-medium text-lime-400">Lebenslang</div>
+                    <div class="text-6xl font-bold my-8">20 €</div>
+                    <button onclick="buySubscription()" class="w-full py-4 bg-lime-500 text-black rounded-2xl">Weiter</button>
+                </div>
+            </div>
+            
+            <div class="mt-20 text-center text-lg">
+                <p class="mb-6">Um den Lizenzcode zu erhalten und deinen Einkauf fortzuführen,<br>wende dich bitte an den TikTok-Kanal <strong>@tuning_deutschland</strong></p>
+                <button onclick="goToTikTok()" class="inline-flex items-center gap-4 bg-black border border-white px-10 py-6 rounded-3xl text-xl hover:bg-zinc-900">
+                    <i class="fa-brands fa-tiktok text-4xl"></i>
+                    <span>Zum TikTok-Kanal</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="py-20 bg-black">
+        <div class="max-w-6xl mx-auto px-6">
+            <h2 class="text-3xl font-bold text-center mb-12">Bewertungen</h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-zinc-900 p-8 rounded-3xl">
+                    <div class="flex text-amber-400 mb-4">★★★★★</div>
+                    <p class="italic">"Super App! Schnell verbunden und der Flash hat perfekt funktioniert. Mein G3 Max ist jetzt viel stärker."</p>
+                    <div class="mt-8 text-sm">— Paul M., Berlin</div>
+                </div>
+                <div class="bg-zinc-900 p-8 rounded-3xl">
+                    <div class="flex text-amber-400 mb-4">★★★★☆</div>
+                    <p class="italic">"Alles hat gut geklappt. Nur die erste Antwort kam nach ca. 40 Minuten. Ansonsten top!"</p>
+                    <div class="mt-8 text-sm">— Katrin P., München</div>
+                </div>
+                <div class="bg-zinc-900 p-8 rounded-3xl">
+                    <div class="flex text-amber-400 mb-4">★★★★★</div>
+                    <p class="italic">"Viele echte Modelle und stabile Verbindung. Absolut empfehlenswert."</p>
+                    <div class="mt-8 text-sm">— Lukas S., Hamburg</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- License Modal -->
+    <div id="license-modal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-[100]">
+        <div class="bg-zinc-900 rounded-3xl p-10 max-w-md w-full mx-4 modal">
+            <h3 class="text-3xl font-bold mb-8">Lizenzcode eingeben</h3>
+            <input id="license-input" type="text" placeholder="TUNE-XXXX-XXXX-XXXX-XXXX" 
+                   class="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-7 py-6 text-xl mb-8 focus:outline-none focus:border-lime-500">
+            <button onclick="verifyLicense()" class="w-full py-5 bg-white text-black rounded-2xl text-xl font-semibold mb-4">Prüfen &amp; Freischalten</button>
+            <button onclick="closeLicenseModal()" class="w-full py-5 border border-zinc-600 rounded-2xl">Abbrechen</button>
+            <div id="license-message" class="mt-6 text-center"></div>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading-overlay" class="hidden fixed inset-0 bg-black/95 flex items-center justify-center z-[200]">
+        <div class="text-center">
+            <div class="w-24 h-24 border-8 border-zinc-700 border-t-lime-500 rounded-full animate-spin mx-auto mb-8"></div>
+            <div id="loading-text" class="text-2xl">Verbindung wird hergestellt...</div>
+        </div>
+    </div>
+
+    <!-- Flash -->
+    <div id="flash-modal" class="hidden fixed inset-0 bg-black/95 flex items-center justify-center z-[300]">
+        <div class="text-center">
+            <h2 class="text-5xl font-bold mb-12">FLASH LÄUFT</h2>
+            <div class="h-4 bg-zinc-800 rounded-full w-96 mx-auto mb-6 overflow-hidden">
+                <div id="flash-bar" class="h-full bg-gradient-to-r from-lime-400 to-cyan-400 w-0 transition-all"></div>
+            </div>
+            <div id="flash-percentage" class="text-7xl font-mono font-bold text-lime-400">0</div>
+        </div>
+    </div>
+
+    <!-- Modals: FAQ, Legal, Privacy -->
+    <div id="faq-modal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-[100]">
+        <div class="bg-zinc-900 rounded-3xl p-8 max-w-lg w-full modal max-h-[85vh] overflow-auto">
+            <h2 class="text-3xl font-bold mb-8">FAQ</h2>
+            <div class="space-y-8 text-sm">
+                <div><strong>Funktioniert das mit allen Rollern?</strong><br>Ja – vor allem mit Ninebot, Xiaomi und Segway Modellen.</div>
+                <div><strong>Ist das legal?</strong><br>Nur auf privatem Gelände erlaubt.</div>
+                <div><strong>Wie lange dauert der Flash?</strong><br>Ca. 60 Sekunden.</div>
+            </div>
+            <button onclick="closeFAQ()" class="mt-10 w-full py-4 border border-zinc-600 rounded-2xl">Schließen</button>
+        </div>
+    </div>
+
+    <div id="legal-modal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-[100]">
+        <div class="bg-zinc-900 rounded-3xl p-8 max-w-lg w-full modal">
+            <h2 class="text-3xl font-bold mb-6">Impressum</h2>
+            <p class="text-sm leading-relaxed">
+                E-Tuning Pro<br>
+                Betreiber: TikTok tuning-deutschland<br>
+                Kontakt über TikTok-Kanal @tuning_deutschland<br><br>
+                Alle Tuning-Funktionen nur für den Einsatz auf privatem Gelände.
+            </p>
+            <button onclick="closeLegal()" class="mt-10 w-full py-4 border border-zinc-600 rounded-2xl">Schließen</button>
+        </div>
+    </div>
+
+    <div id="privacy-modal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-[100]">
+        <div class="bg-zinc-900 rounded-3xl p-8 max-w-lg w-full modal">
+            <h2 class="text-3xl font-bold mb-6">Datenschutz</h2>
+            <p class="text-sm">Wir speichern keine unnötigen Daten. Alle Verbindungen sind lokal.</p>
+            <button onclick="closePrivacy()" class="mt-10 w-full py-4 border border-zinc-600 rounded-2xl">Schließen</button>
+        </div>
+    </div>
+
+    <footer class="bg-black py-12 text-center text-xs text-zinc-500">
+        © 2026 E-Tuning Pro • Nur für privates Gelände
+    </footer>
+
+    <script>
+        const models = ["Ninebot Max G3","Ninebot Max G2","Ninebot F3 Pro","Xiaomi Electric Scooter 6 Pro","Xiaomi M365 Pro","Ninebot GT2","Xiaomi Electric Scooter 5 Pro","Segway Max G30P"];
+        
+        const validLicenses = ["TUNE-7K9P-4M2X-Q8VJ-L3NB","TUNE-9X2L-P5QJ-8M4K-V7RP","TUNE-3B7H-6N9X-2Q4V-5M8K","TUNE-8V4L-2P9M-7Q3X-K5JN","TUNE-5M8K-9X2Q-4V7L-P3JB","TUNE-2Q4X-7M9V-L3K8-P5HN","TUNE-6N9P-3B7J-8V4M-Q2XL","TUNE-4K8M-5P2Q-9X7V-L3JB","TUNE-7V3L-2Q9M-8K5P-X4JN","TUNE-9M4X-6Q2L-3V8K-P5HB","TUNE-1B8K-4M7P-9Q2X-V5JL","TUNE-5Q9M-2V4L-8K7P-X3JN","TUNE-3M7X-6P9K-2Q4V-L8HB","TUNE-8V5L-9M2Q-4K7P-X3JN","TUNE-2Q8M-7K4P-5V9X-L3JB"];
+        
+        let licenseActivated = false;
+        
+        function populateModels() {
+            const sel = document.getElementById('scooter-model');
+            sel.innerHTML = '<option value="">Modell auswählen...</option>';
+            models.forEach(m => {
+                const o = document.createElement('option');
+                o.value = m; o.textContent = m;
+                sel.appendChild(o);
+            });
+        }
+        
+        function updateModelSpecifics() {
+            const val = document.getElementById('scooter-model').value;
+            document.getElementById('model-specific').classList.toggle('hidden', !val.includes('G3'));
+        }
+        
+        function showLicenseModal() {
+            document.getElementById('license-modal').classList.remove('hidden');
+        }
+        
+        function closeLicenseModal() {
+            document.getElementById('license-modal').classList.add('hidden');
+        }
+        
+        function verifyLicense() {
+            const code = document.getElementById('license-input').value.trim().toUpperCase();
+            const msgEl = document.getElementById('license-message');
+            
+            if (validLicenses.includes(code)) {
+                licenseActivated = true;
+                msgEl.innerHTML = '<span class="text-lime-400">✓ Lizenz gültig! Tuning freigeschaltet.</span>';
+                setTimeout(() => {
+                    closeLicenseModal();
+                    document.getElementById('tuning-content').classList.remove('hidden');
+                }, 1200);
+            } else {
+                msgEl.innerHTML = '<span class="text-red-400">Ungültiger Code. Bitte versuche es erneut.</span>';
+            }
+        }
+        
+        function connectDevice() {
+            if (!licenseActivated) {
+                alert("Bitte zuerst einen gültigen Lizenzcode eingeben.");
+                return;
+            }
+            const model = document.getElementById('scooter-model').value;
+            if (!model) return alert("Bitte wähle ein Modell.");
+            
+            showLoading("Geräte suchen...", 9500, () => {
+                document.getElementById('connection-status').classList.remove('hidden');
+                document.getElementById('status-text').textContent = `Verbunden mit ${model}`;
+            });
+        }
+        
+        function disconnectDevice() {
+            document.getElementById('connection-status').classList.add('hidden');
+        }
+        
+        function updateSpeedValue(sl) {
+            document.getElementById('speed-value').textContent = sl.value;
+        }
+        
+        function startFlash() {
+            const modal = document.getElementById('flash-modal');
+            modal.classList.remove('hidden');
+            let p = 0;
+            const iv = setInterval(() => {
+                p += Math.random() * 7 + 4;
+                if (p > 100) p = 100;
+                document.getElementById('flash-bar').style.width = p + '%';
+                document.getElementById('flash-percentage').textContent = Math.floor(p);
+                if (p >= 100) {
+                    clearInterval(iv);
+                    setTimeout(() => { modal.classList.add('hidden'); alert("Flash erfolgreich abgeschlossen!"); }, 700);
+                }
+            }, 520);
+        }
+        
+        function showLoading(txt, duration, callback) {
+            const ov = document.getElementById('loading-overlay');
+            document.getElementById('loading-text').textContent = txt;
+            ov.classList.remove('hidden');
+            setTimeout(() => { ov.classList.add('hidden'); if(callback) callback(); }, duration);
+        }
+        
+        function navigateTo(page) {
+            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+            if (page === 'home') document.getElementById('home-section').classList.remove('hidden');
+            else if (page === 'shop') document.getElementById('shop-section').classList.remove('hidden');
+            else if (page === 'tuning') document.getElementById('tuning-section').classList.remove('hidden');
+        }
+        
+        function toggleMenu() { document.getElementById('mobile-menu').classList.toggle('hidden'); }
+        function buySubscription() { alert("Weiterleitung zum TikTok-Kanal..."); goToTikTok(); }
+        function goToTikTok() { window.open('https://www.tiktok.com/@tuning_deutschland', '_blank'); }
+        function showFAQ() { document.getElementById('faq-modal').classList.remove('hidden'); }
+        function closeFAQ() { document.getElementById('faq-modal').classList.add('hidden'); }
+        function showLegal() { document.getElementById('legal-modal').classList.remove('hidden'); }
+        function closeLegal() { document.getElementById('legal-modal').classList.add('hidden'); }
+        function showPrivacy() { document.getElementById('privacy-modal').classList.remove('hidden'); }
+        function closePrivacy() { document.getElementById('privacy-modal').classList.add('hidden'); }
+        
+        window.onload = () => {
+            populateModels();
+            navigateTo('home');
+        };
+    </script>
 </body>
 </html>
